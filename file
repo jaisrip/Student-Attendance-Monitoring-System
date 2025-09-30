@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Att {
+    int sid; char date[12]; char status; struct Att *next;
+} Att;
+
+Att* add_att(Att *h,int sid,char *date,char status){
+    Att *n=malloc(sizeof(Att)); n->sid=sid; strcpy(n->date,date); n->status=status; n->next=NULL;
+    if(!h) return n;
+    Att *t=h; while(t->next) t=t->next; t->next=n; return h;
+}
+Att* delete_entry(Att *h,int sid,char *date){
+    Att *t=h,*prev=NULL;
+    while(t && !(t->sid==sid && strcmp(t->date,date)==0)){ prev=t; t=t->next; }
+    if(!t){ printf("Not found\n"); return h; }
+    if(!prev) { h=h->next; free(t); } else { prev->next=t->next; free(t); }
+    printf("Deleted\n"); return h;
+}
+void search_by_student(Att *h,int sid){
+    while(h){ if(h->sid==sid) printf("%s %c\n",h->date,h->status); h=h->next; }
+}
+void search_by_date(Att *h,char *date){
+    printf("Date %s:\n",date); while(h){ if(strcmp(h->date,date)==0) printf("%d %c\n",h->sid,h->status); h=h->next; }
+}
+void reverse_display(Att *h){ if(!h) return; reverse_display(h->next); printf("%d %s %c\n",h->sid,h->date,h->status); }
+Att* clone_att(Att *h){ if(!h) return NULL; Att *nh=NULL,*tail=NULL,*t=h; while(t){ Att *n=malloc(sizeof(Att)); *n=*t; n->next=NULL; if(!nh) nh=tail=n; else { tail->next=n; tail=n; } t=t->next; } return nh; }
+
+int main(){
+    Att *h=NULL; int ch;
+    while(1){
+        printf("\n1.Add 2.Delete 3.Search student 4.Search date 5.Reverse 6.Clone 7.Exit\nChoice: "); if(scanf("%d",&ch)!=1) break;
+        if(ch==1){ int sid; char date[12]; char st; printf("sid date status(P/A): "); scanf("%d %11s %c",&sid,date,&st); h = add_att(h,sid,date,st); }
+        else if(ch==2){ int sid; char date[12]; printf("sid date: "); scanf("%d %11s",&sid,date); h = delete_entry(h,sid,date); }
+        else if(ch==3){ int sid; printf("sid: "); scanf("%d",&sid); search_by_student(h,sid); }
+        else if(ch==4){ char date[12]; printf("date: "); scanf("%11s",date); search_by_date(h,date); }
+        else if(ch==5) reverse_display(h);
+        else if(ch==6){ Att *cl = clone_att(h); printf("Cloned\n"); Att *t=cl; while(t){ printf("%d %s %c\n",t->sid,t->date,t->status); t=t->next; } while(cl){ Att *tmp=cl; cl=cl->next; free(tmp);} }
+        else break;
+    }
+    return 0;
+}
